@@ -1,6 +1,6 @@
 lazy val root = (project in file(".")).
   settings(
-    name := "firststeps",
+    name := "tailrecursivemadness",
     version := "2019.0",
     scalaVersion := "2.12.8"
   )

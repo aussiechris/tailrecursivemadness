@@ -2,6 +2,8 @@ package cosc250.recursion
 
 import scala.annotation.tailrec
 
+
+
 object TailRecursiveMadness {
 
   /**
@@ -24,7 +26,7 @@ object TailRecursiveMadness {
       * factorial(n) is 1 * 2 * 3 * ... n
       */
     def factorial(n:Int):Int = {
-      ???
+      if (n <= 1) 1 else n * factorial (n-1)
     }
 
     /**
@@ -38,14 +40,19 @@ object TailRecursiveMadness {
       * But unlike Int, summing BigInts has no maximum value.
       */
     def fibonacci(n:Int):BigInt = {
-      ???
+      if (n<=0) {
+        BigInt(0)
+      } else if (n==1) {
+        BigInt(1)
+      } else {
+        fibonacci(n-1) + fibonacci(n-2)
+      }
     }
 
     // Puzzle: try calling it with a large number - say 100. What breaks?
     // (Comment out this line, and then run the tests. The println will be run as part of the object
     // initialisation for the NonTail object)
-    // println(fibonacci(100))
-
+    // println(fibonacci(10))
 
     /**
       * Let's do one using Lists
@@ -76,9 +83,16 @@ object TailRecursiveMadness {
       }
 
       // Now write the body of pascal(n)
-      ???
+      if (n<=0) {
+        List(1)
+      } else {
+        val prev = pascal(n - 1)
+        val left = 0 +: prev
+        val right = prev :+ 0
+        val zipped = left.zip(right)
+        sumPairs(zipped)
+      }
     }
-
   }
 
   object Tail {
@@ -107,14 +121,12 @@ object TailRecursiveMadness {
       */
     def factorial(n:Int):Int = {
 
-      //@tailrec
+      @tailrec
       def fac(n:Int, accum:Int):Int = {
-        ???
+        if (n <= 0) accum else fac(n-1,accum*n)
       }
-
-      ???
+      fac(n,1)
     }
-
 
     /**
       * Now for a tail-recursive fibonacci
@@ -128,16 +140,21 @@ object TailRecursiveMadness {
       // then n=k-2, a=1 b=2
       // then n=k-3, a=2 b=3
       // until you reach n=0
-      //@tailrec
+      @tailrec
       def fibInt(n:Int, a:BigInt=0, b:BigInt=1):BigInt = {
-        ???
+        if (n<=0) {
+          a
+        } else if (n==1) {
+          b
+        } else {
+          fibInt(n-1,b,a+b)
+        }
       }
-
-      ???
+      fibInt(n)
     }
 
     // Try fibonacci(60), but not too large or it will take a really long time.
-    // println(fibonacci(60))
+    // println(fibonacci(1000000))
 
     /**
       * Now for a tail recursive Pascal's triangle
@@ -150,7 +167,7 @@ object TailRecursiveMadness {
         * Let's do that tail recursively for you
         */
       @tailrec
-      def sumPairs(source:List[(Int, Int)], dest:List[Int] = Nil):List[Int] = {
+      def sumPairs(source: List[(Int, Int)], dest: List[Int] = Nil): List[Int] = {
         // Notice we build up the destination by adding to the head.
         // This gives the list in reverse, so we have to reverse it in the terminal case
         source match {
@@ -159,10 +176,20 @@ object TailRecursiveMadness {
         }
       }
 
+      @tailrec
+      def pas(n: Int,prev:List[Int]=List(1)): List[Int] = {
+        if (n <= 0) {
+          prev
+        } else {
+          val left = 0 +: prev
+          val right = prev :+ 0
+          val zipped = left.zip(right)
+          pas(n-1,sumPairs(zipped))
+        }
+      }
 
-      // I'll let you define the inner tail-recursive function this time.
+      pas(n)
 
-      ???
     }
 
   }
@@ -195,10 +222,10 @@ object TailRecursiveMadness {
       *
       * This is going to be our function for choosing the nextNumeral
       */
-    // @tailrec
+    @tailrec
     def nextNumeral(n:Int, numerals:List[(String, Int)] = allNumerals):(String, Int) = {
       // either the head pair is the one we want, or call ourselves recursively for the tail
-      ???
+      if (numerals.head._2<=n) numerals.head else nextNumeral(n,numerals.tail)
     }
 
     /**
@@ -208,11 +235,13 @@ object TailRecursiveMadness {
 
       // Now define an inner tail recursive function that will build up our Roman numeral
       // We keep the string we've built so far in s
-      //@tailrec
+      @tailrec
       def intRom(n:Int, s:String = ""):String = {
-        ???
+        if (n<=0) s else {
+          val currentNumerals = nextNumeral(n,allNumerals)
+          intRom(n-currentNumerals._2,s+currentNumerals._1)
+        }
       }
-
       intRom(n)
     }
 
@@ -248,9 +277,18 @@ object TailRecursiveMadness {
       * If not, have two outer cases. Is the destination list empty or not?
       * If not, does the number at the head of the source list match or not match dest(1)?
       */
-    //@tailrec
+    @tailrec
     def nextLine(source:List[Int], dest:List[Int] = Nil):List[Int] = {
-      ???
+//      source match {
+//        case Nil => dest.reverse
+//        case sh :: st => dest match {
+//          case dh :: dn :: dt if (dh==sh) => nextLine(st,dh::dn+1::dt)
+//          case _ => nextLine(st,sh::1::dest)
+//        }
+//      }
+      if (source.isEmpty) dest.reverse
+      else if (dest.isEmpty || source.head!=dest.head) nextLine(source.tail, source.head :: 1 :: dest)
+      else nextLine(source.tail, dest.head :: dest(1)+1 :: dest.tail.tail)
     }
 
     /**
@@ -258,9 +296,13 @@ object TailRecursiveMadness {
       */
     def puzzle(n:Int):List[Int] = {
 
-      //@tailrec
+      @tailrec
       def intPuz(n:Int, line:List[Int] = List(1)):List[Int] = {
-        ???
+        if (n<=0){
+          line
+        } else {
+          intPuz(n-1,nextLine(line))
+        }
       }
 
       intPuz(n)
